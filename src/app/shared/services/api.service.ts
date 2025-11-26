@@ -10,8 +10,61 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
+  getPurchaseOrders(vendorId: string): Observable<any[]> {
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <urn:ZFM_PO_863>
+            <IV_VENDOR_ID>${vendorId}</IV_VENDOR_ID>
+          </urn:ZFM_PO_863>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+
+    const url = '/sap/bc/srt/scs/sap/ZRFC_PO_Vendor_863?sap-client=' + environment.sapClient;
+
+    return this.http.post(url, soapBody, {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/xml; charset=utf-8'
+        // Add SOAPAction if your server requires it, otherwise leave blank
+      }),
+      responseType: 'text'
+    }).pipe(
+      map(responseXml => this.parsePoResponse(responseXml))
+    );
+  }
+
+  // Helper: Parse the List of POs
+  private parsePoResponse(xml: string): any[] {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
+    const poList: any[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const node = items[i];
+      
+      // Helper to safely get text content
+      const getText = (tag: string) => node.getElementsByTagName(tag)[0]?.textContent || '';
+
+      poList.push({
+        poNumber: getText('PO_NUMBER'),
+        vendorId: getText('VENDOR_ID'),
+        poDate: getText('PO_DATE'),
+        purchOrg: getText('PURCH_ORG'),
+        // Logic to remove leading zeros from Material Number
+        materialNo: getText('MATERIAL_NO').replace(/^0+/, ''),
+        unit: getText('UNIT'),
+        netPrice: parseFloat(getText('NET_PRICE') || '0'),
+        deliveryDate: getText('DELIVERY_DATE'),
+        currency: getText('CURRENCY')
+      });
+    }
+    return poList;
+  }
+
   login(vendorId: string, password: string): Observable<any> {
-    // 1. Construct the SOAP Envelope (Matches your Postman Body)
     const soapBody = `
       <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
         <soapenv:Header/>
@@ -24,7 +77,6 @@ export class ApiService {
       </soapenv:Envelope>
     `;
 
-    // 2. Define Headers (SOAPAction is required based on your screenshot)
     const headers = new HttpHeaders({
       'SOAPAction': 'urn:sap-com:document:sap:rfc:functions:ZRFC_LOGIN_VALIDATE_863:ZFM_LOGIN_VALIDATE_RP_863Request' 
       // Note: I used the Action from your screenshot. If it fails, try just empty string ""

@@ -45,8 +45,7 @@ export class LoginComponent {
             // Save Vendor ID to session for other pages to use
             sessionStorage.setItem('currentVendor', vendorId);
             // Navigate to Dashboard
-            // this.router.navigate(['/dashboard']); // Uncomment when dashboard is ready
-            alert("Login Successful! (Redirecting to Dashboard...)");
+            this.router.navigate(['/dashboard']);
           } else {
             this.errorMessage = response.message || 'Invalid Credentials';
           }

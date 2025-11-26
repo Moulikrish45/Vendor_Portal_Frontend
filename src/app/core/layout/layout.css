@@ -1,0 +1,239 @@
+.app-container {
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-light);
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    width: 260px;
+    background-color: var(--color-carbon); /* 262626 */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.brand {
+    padding: 2rem;
+    border-bottom: 1px solid #333;
+}
+
+.brand h2 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.highlight { color: var(--color-tan); } /* CCAD8F */
+
+.nav-links {
+    flex: 1;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #ccc;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.nav-icon { margin-right: 15px; }
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Active State */
+.nav-item.active {
+    background-color: var(--color-mahogany); /* B3001B */
+    color: white;
+    box-shadow: 0 4px 15px rgba(179, 0, 27, 0.3);
+}
+
+.user-info {
+    padding: 2rem;
+    border-top: 1px solid #333;
+    background-color: #1a1a1a;
+}
+
+.user-info small { color: #888; display: block; }
+.user-info strong { display: block; margin-bottom: 1rem; color: var(--color-wisteria); }
+
+.btn-logout {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 8px 15px;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.btn-logout:hover {
+    border-color: var(--color-mahogany);
+    color: var(--color-mahogany);
+}
+
+/* --- MAIN CONTENT --- */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Scrollable content */
+}
+
+.topbar {
+    background-color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.topbar h3 { margin: 0; color: var(--color-carbon); }
+.date { color: var(--color-baltic); font-weight: 600; font-size: 0.9rem; }
+
+.content-wrapper {
+    padding: 2rem;
+}
+
+/* Base styles remain, add these new ones */
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-light);
+    overflow: hidden; /* Prevent body scroll when menu is open */
+}
+
+/* Sidebar Defaults */
+.sidebar {
+    width: 260px;
+    background-color: var(--color-carbon);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.close-btn { display: none; }
+.hamburger { 
+    display: none; 
+    border: none;
+    background: transparent;
+}
+.mobile-overlay { display: none; }
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* --- MOBILE RESPONSIVENESS (< 768px) --- */
+@media (max-width: 768px) {
+    
+    /* 1. Hide Sidebar by default (Off-canvas) */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 80%; /* Takes up 80% of screen width */
+        max-width: 300px;
+        transform: translateX(-100%); /* Move it off screen */
+        
+        /* THE GLASS EFFECT */
+        background-color: rgba(38, 38, 38, 0.95); /* Carbon with transparency */
+        backdrop-filter: blur(10px); /* Frosted glass look */
+    }
+
+    /* 2. State: Open */
+    .sidebar.open {
+        transform: translateX(0); /* Slide in */
+    }
+
+    /* 3. Hamburger Button */
+    .hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        margin-right: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        background: #fff;
+        cursor: pointer;
+        color: var(--color-carbon);
+    }
+
+    .hamburger svg {
+        display: block;
+    }
+
+    .header-left {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    /* 4. Close Button inside sidebar */
+    .close-btn {
+        display: block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+
+    /* 5. Dark Overlay behind sidebar */
+    .mobile-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 900;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .mobile-overlay.show {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* Hide Date on small mobile */
+    .date {
+        font-size: 0.75rem;
+        text-align: right;
+    }
+    
+    .content-wrapper {
+        padding: 1rem; /* Less padding on mobile */
+    }
+}

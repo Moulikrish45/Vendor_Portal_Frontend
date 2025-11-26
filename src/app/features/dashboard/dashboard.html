@@ -1,1 +1,79 @@
-<p>dashboard works!</p>
+<div class="welcome-header">
+    <h1>{{ greeting }}, <span class="vendor-highlight">Partner</span></h1>
+    <p class="fade-in">System Status: <span class="status-badge">● Operational</span></p>
+</div>
+
+<!-- KPI Grid -->
+<div class="dashboard-grid">
+    <div class="kpi-card" *ngFor="let kpi of kpis" [style.border-top-color]="kpi.color">
+        <div class="kpi-icon" 
+             [style.background-color]="kpi.color"
+             [innerHTML]="getSafeSvg(kpi.svg)">
+        </div>
+        <div class="kpi-details">
+            <h3>{{ kpi.value }}</h3>
+            <p>{{ kpi.title }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="section-spacer"></div>
+
+<!-- SPLIT SECTION: Lifecycle & Quick Actions -->
+<div class="advanced-grid">
+    
+    <!-- 1. LIVE SHIPMENT TRACKER (Timeline) -->
+    <div class="card-panel tracker-card">
+        <div class="card-header">
+            <h3>Latest Order #4500921</h3>
+            <span class="tag">In Transit</span>
+        </div>
+        
+        <div class="timeline">
+            <!-- Step 1: Completed -->
+            <div class="timeline-item completed">
+                <div class="dot">✓</div>
+                <div class="content">
+                    <h4>PO Created</h4>
+                    <p>Nov 20</p>
+                </div>
+            </div>
+            <!-- Step 2: Completed -->
+            <div class="timeline-item completed">
+                <div class="dot">✓</div>
+                <div class="content">
+                    <h4>Confirmed</h4>
+                    <p>Nov 21</p>
+                </div>
+            </div>
+            <!-- Step 3: ACTIVE (Pulsing) -->
+            <div class="timeline-item active">
+                <div class="dot pulsing"></div>
+                <div class="content">
+                    <h4>Shipped</h4>
+                    <p>Nov 23</p>
+                </div>
+            </div>
+            <!-- Step 4: Pending -->
+            <div class="timeline-item">
+                <div class="dot"></div>
+                <div class="content">
+                    <h4>Goods Receipt</h4>
+                    <p>Pending</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. QUICK ACTIONS (Glass Tiles) -->
+    <div class="card-panel actions-card">
+        <h3>Quick Actions</h3>
+        <div class="actions-grid">
+            <button class="action-btn" *ngFor="let action of quickActions">
+                <span class="action-icon" [innerHTML]="getSafeSvg(action.svg)"></span>
+                {{ action.label }}
+            </button>
+        </div>
+    </div>
+
+</div>
