@@ -1,0 +1,28 @@
+/* src/styles.css */
+:root {
+    /* Your Palette */
+    --color-mahogany: #B3001B;
+    --color-carbon: #262626;
+    --color-tan: #CCAD8F;
+    --color-baltic: #255C99;
+    --color-wisteria: #7EA3CC;
+
+    /* Functional Colors */
+    --bg-light: #f4f7fa;
+    --text-main: #262626;
+    --text-muted: #666;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+}
+
+* {
+    box-sizing: border-box;
+}

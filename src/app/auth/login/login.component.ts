@@ -1,0 +1,65 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ApiService } from '../../shared/services/api.service'; // Import API Service
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
+})
+export class LoginComponent {
+  loginForm: FormGroup;
+  isLoading = false;
+  errorMessage = '';
+
+  // Inject ApiService
+  constructor(
+    private fb: FormBuilder, 
+    private router: Router,
+    private apiService: ApiService 
+  ) {
+    this.loginForm = this.fb.group({
+      vendorId: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
+      password: ['', Validators.required]
+    });
+  }
+
+  onSubmit() {
+    if (this.loginForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = ''; // Clear previous errors
+
+      const { vendorId, password } = this.loginForm.value;
+
+      // Real API Call
+      this.apiService.login(vendorId, password).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          
+          if (response.success) {
+            console.log('Login Successful:', response.message);
+            // Save Vendor ID to session for other pages to use
+            sessionStorage.setItem('currentVendor', vendorId);
+            // Navigate to Dashboard
+            // this.router.navigate(['/dashboard']); // Uncomment when dashboard is ready
+            alert("Login Successful! (Redirecting to Dashboard...)");
+          } else {
+            this.errorMessage = response.message || 'Invalid Credentials';
+          }
+        },
+        error: (err) => {
+          console.error('API Error:', err);
+          this.isLoading = false;
+          this.errorMessage = 'Connection to SAP failed. Please try again.';
+        }
+      });
+
+    } else {
+      this.loginForm.markAllAsTouched();
+    }
+  }
+}

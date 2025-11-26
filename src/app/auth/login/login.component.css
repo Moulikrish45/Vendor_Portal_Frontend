@@ -1,0 +1,248 @@
+/* Container for the split view */
+.login-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* --- LEFT SIDE: BRANDING --- */
+.brand-section {
+    flex: 1;
+    background: linear-gradient(135deg, var(--color-carbon) 0%, var(--color-mahogany) 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-content {
+    z-index: 2;
+    max-width: 500px;
+}
+
+h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.highlight {
+    color: var(--color-tan);
+}
+
+.brand-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.decorative-line {
+    width: 60px;
+    height: 4px;
+    background-color: var(--color-wisteria);
+    margin: 20px 0;
+}
+
+/* Background Shapes */
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.1;
+    background: white;
+}
+
+.circle-1 {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+    left: -50px;
+}
+
+.circle-2 {
+    width: 500px;
+    height: 500px;
+    bottom: -100px;
+    right: -100px;
+}
+
+/* --- RIGHT SIDE: FORM --- */
+.form-section {
+    flex: 1.2;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 450px;
+}
+
+.header h2 {
+    font-size: 2rem;
+    color: var(--color-carbon);
+    margin-bottom: 0.5rem;
+}
+
+.header p {
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+}
+
+/* --- MICRO-INTERACTION INPUTS --- */
+.input-group {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 1rem;
+    color: var(--color-carbon);
+    border: none;
+    border-bottom: 2px solid #ddd;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.3s ease;
+}
+
+.input-group label {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    font-size: 1rem;
+    color: #999;
+    pointer-events: none;
+    transition: 0.3s ease all;
+}
+
+/* The Magic: Float label when focused or has value (placeholder placeholder=" " trick) */
+.input-group input:focus ~ label,
+.input-group input:not(:placeholder-shown) ~ label {
+    top: -10px;
+    font-size: 0.85rem;
+    color: var(--color-baltic);
+    font-weight: 600;
+}
+
+.input-group input:focus {
+    border-bottom: 2px solid var(--color-baltic);
+}
+
+.input-group input.ng-invalid.ng-touched {
+    border-bottom: 2px solid var(--color-mahogany);
+}
+
+.error-msg {
+    color: var(--color-mahogany);
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+/* --- BUTTONS & LINKS --- */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+}
+
+.forgot-pass {
+    color: var(--color-baltic);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.forgot-pass:hover {
+    color: var(--color-mahogany);
+}
+.global-error {
+    background-color: #ffebee;
+    color: var(--color-mahogany);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 0.9rem;
+    border: 1px solid var(--color-mahogany);
+}
+.btn-login {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--color-mahogany);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s;
+    box-shadow: 0 4px 6px rgba(179, 0, 27, 0.2);
+}
+
+.btn-login:hover:not(:disabled) {
+    background-color: #900016; /* Darker mahogany */
+    transform: translateY(-2px);
+}
+
+.btn-login:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+/* --- LOADER --- */
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #FFF;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+
+    .brand-section {
+        flex: 0 0 150px; /* Small header on top */
+        padding: 1.5rem;
+    }
+    
+    .brand-content h1 { font-size: 2rem; }
+    .brand-content p, .decorative-line, .brand-desc { display: none; } /* Hide details on mobile */
+
+    .form-section {
+        align-items: flex-start;
+        padding-top: 3rem;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        margin-top: -20px; /* Overlap effect */
+        z-index: 10;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+    }
+}

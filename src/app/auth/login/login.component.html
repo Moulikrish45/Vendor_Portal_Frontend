@@ -1,0 +1,60 @@
+<div class="login-container">
+    
+    <!-- LEFT SIDE: Branding -->
+    <div class="brand-section">
+        <div class="brand-content">
+            <h1>Vendor<span class="highlight">Portal</span></h1>
+            <p>Secure Enterprise Gateway</p>
+            <div class="decorative-line"></div>
+            <p class="brand-desc">Manage Orders, RFQs, and Financials in real-time.</p>
+        </div>
+        <!-- Decorative Circles for visual interest -->
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <!-- RIGHT SIDE: Form -->
+    <div class="form-section">
+        <div class="form-card">
+            <div class="header">
+                <h2>Welcome Back</h2>
+                <p>Please enter your Vendor ID to continue.</p>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                
+                 <div *ngIf="errorMessage" class="global-error">{{ errorMessage }}</div>
+                <!-- Floating Label Input: Vendor ID -->
+                <div class="input-group">
+                    <input type="text" id="vendorId" formControlName="vendorId" placeholder=" " autocomplete="off">
+                    <label for="vendorId">SAP Vendor ID</label>
+                    <div class="error-msg" *ngIf="loginForm.get('vendorId')?.touched && loginForm.get('vendorId')?.invalid">
+                        Valid Vendor ID is required (Numbers only).
+                    </div>
+                </div>
+
+                <!-- Floating Label Input: Password -->
+                <div class="input-group">
+                    <input type="password" id="password" formControlName="password" placeholder=" ">
+                    <label for="password">Password</label>
+                    <div class="error-msg" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+                        Password is required.
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a href="#" class="forgot-pass">Trouble logging in?</a>
+                </div>
+
+                <button type="submit" [disabled]="loginForm.invalid || isLoading" class="btn-login">
+                    <span *ngIf="!isLoading">Sign In</span>
+                    <span *ngIf="isLoading" class="loader"></span>
+                </button>
+            </form>
+            
+            <div class="footer">
+                <p>Protected by Enterprise Security</p>
+            </div>
+        </div>
+    </div>
+</div>
