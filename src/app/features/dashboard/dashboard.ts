@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiService } from '../../shared/services/api.service';
+import { ToastService } from '../../shared/services/toast.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -45,7 +46,8 @@ export class DashboardComponent implements OnInit {
   
   constructor(
     private sanitizer: DomSanitizer,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private toast: ToastService
   ) {}
 
   ngOnInit() {
@@ -98,6 +100,11 @@ export class DashboardComponent implements OnInit {
   getSafeSvg(svgString: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(svgString);
   }
+
+  onQuickAction(label: string) {
+    this.toast.construction();
+  }
+
   quickActions = [
     { 
       label: 'Submit Invoice', 

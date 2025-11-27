@@ -37,8 +37,8 @@
                 <div class="divider"></div>
 
                 <div class="quick-actions">
-                    <button class="action-btn primary">Edit Details</button>
-                    <button class="action-btn outline">Change Password</button>
+                    <button class="action-btn primary" (click)="editDetails()">Edit Details</button>
+                    <button class="action-btn outline" (click)="changePassword()">Change Password</button>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
         <div class="details-card">
             <div class="section-header">
                 <h3>General Information</h3>
-                <button class="edit-link">Request Change</button>
+                <button class="edit-link" (click)="requestChange()">Request Change</button>
             </div>
 
             <div class="info-grid">

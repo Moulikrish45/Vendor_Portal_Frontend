@@ -69,7 +69,7 @@
     <div class="card-panel actions-card">
         <h3>Quick Actions</h3>
         <div class="actions-grid">
-            <button class="action-btn" *ngFor="let action of quickActions">
+            <button class="action-btn" *ngFor="let action of quickActions" (click)="onQuickAction(action.label)">
                 <span class="action-icon" [innerHTML]="getSafeSvg(action.svg)"></span>
                 {{ action.label }}
             </button>
