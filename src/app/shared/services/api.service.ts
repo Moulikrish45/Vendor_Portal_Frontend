@@ -344,7 +344,7 @@ export class ApiService {
   getInvoicePdf(invoiceNo: string, vendorId: string): Observable<string> {
     console.log('API: getInvoicePdf called', { invoiceNo, vendorId });
     
-    // Pad invoice number with leading zeros to 10 digits (SAP standard)
+    // Pad invoice number with leading zeros to 10 digits (SAP standard)nnnnnn
     const paddedInvoiceNo = invoiceNo.padStart(10, '0');
     console.log('API: Padded invoice number:', paddedInvoiceNo);
     
