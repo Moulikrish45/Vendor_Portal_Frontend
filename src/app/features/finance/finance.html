@@ -1,0 +1,229 @@
+<div class="page-container">
+    
+    <!-- Header with Tabs -->
+    <div class="page-header">
+        <div class="title-group">
+            <h2>Financial Sheet</h2>
+            <p class="subtitle">Track invoices, aging, and credit memos</p>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-group">
+            <button class="tab-btn" [class.active]="activeTab === 'invoices'" (click)="setActiveTab('invoices')">
+                Invoices & Aging
+            </button>
+            <button class="tab-btn" [class.active]="activeTab === 'memos'" (click)="setActiveTab('memos')">
+                Credit/Debit Memos
+            </button>
+        </div>
+        <button class="btn-refresh" (click)="loadData()" [disabled]="isLoading">
+            <span class="icon-spin" [innerHTML]="refreshIcon"></span>
+            Refresh
+        </button>
+    </div>
+
+    <!-- Stats Row with Embedded Search -->
+    <div class="stats-row">
+        <!-- Metrics Container -->
+        <div class="stats-metrics">
+            <div class="stat-item">
+                <span class="label">Total Payable</span>
+                <span class="value">{{ totalPayable | currency:'INR':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="stat-item alert-item">
+                <span class="label">Overdue Amount</span>
+                <span class="value danger">{{ totalOverdue | currency:'INR':'symbol':'1.0-0' }}</span>
+            </div>
+        </div>
+
+        <!-- Search Container -->
+        <div class="stats-search">
+            <div class="search-wrapper">
+                <span class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
+                <input 
+                    type="text" 
+                    [(ngModel)]="searchTerm" 
+                    (input)="applySearch()" 
+                    [placeholder]="activeTab === 'invoices' ? 'Search Invoice #' : 'Search Memo #'"
+                    class="search-input stat-search-input"
+                >
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div><p>Analyzing financial records...</p>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="table-card" *ngIf="!isLoading">
+        
+        <!-- TAB 1: INVOICES -->
+        <div class="table-scroll" *ngIf="activeTab === 'invoices'">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Invoice #</th>
+                        <th style="width: 15%">Doc Date</th>
+                        <th style="width: 15%">Due Date</th>
+                        <th style="width: 15%" class="text-right">Amount</th>
+                        <th style="width: 15%" class="text-right">Aging (Days)</th>
+                        <th style="width: 15%">Status</th>
+                        <th style="width: 10%" class="text-center">PDF</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let inv of filteredInvoices">
+                        <td class="primary-text"><strong>{{ inv.invoiceNum }}</strong></td>
+                        <td>{{ inv.docDate | date:'mediumDate' }}</td>
+                        <td>{{ inv.dueDate | date:'mediumDate' }}</td>
+                        <td class="text-right font-weight-bold">{{ inv.amount | currency:inv.currency }}</td>
+                        
+                        <td class="text-right">
+                            <span [class.text-danger]="inv.agingDays > 0">{{ inv.agingDays }}</span>
+                        </td>
+                        
+                        <td>
+                            <span class="badge" [ngClass]="inv.status === 'Overdue' ? 'badge-mahogany' : 'badge-baltic'">
+                                {{ inv.status }}
+                            </span>
+                        </td>
+                        <td class="text-center action-cell">
+                            <button class="icon-btn" title="Download PDF">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Mobile Cards: Invoices -->
+        <div class="mobile-cards" *ngIf="activeTab === 'invoices'">
+            <div class="finance-card" *ngFor="let inv of filteredInvoices">
+                <div class="card-header">
+                    <div>
+                        <span class="card-label">Invoice</span>
+                        <strong>#{{ inv.invoiceNum }}</strong>
+                    </div>
+                    <span class="badge" [ngClass]="inv.status === 'Overdue' ? 'badge-mahogany' : 'badge-baltic'">
+                        {{ inv.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="card-row">
+                        <span>Document Date</span>
+                        <strong>{{ inv.docDate | date:'mediumDate' }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Due Date</span>
+                        <strong>{{ inv.dueDate | date:'mediumDate' }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Amount</span>
+                        <strong>{{ inv.amount | currency:inv.currency }}</strong>
+                    </div>
+                    <div class="card-row" [ngClass]="{'text-danger': inv.agingDays > 0}">
+                        <span>Aging (Days)</span>
+                        <strong>{{ inv.agingDays }}</strong>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="icon-btn" title="Download PDF">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MEMOS -->
+        <div class="table-scroll" *ngIf="activeTab === 'memos'">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Memo #</th>
+                        <th style="width: 10%">Type</th>
+                        <th style="width: 15%">Date</th>
+                        <th style="width: 20%">Reference / Material</th>
+                        <th style="width: 10%">Ind</th>
+                        <th style="width: 15%" class="text-right">Amount</th>
+                        <th style="width: 15%" class="text-right">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let memo of filteredMemos">
+                        <td class="primary-text"><strong>{{ memo.memoNum }}</strong></td>
+                        <td><span class="org-tag">{{ memo.docType }}</span></td>
+                        <td>{{ memo.postingDate | date:'mediumDate' }}</td>
+                        <td>
+                            <span class="mat-num">{{ memo.materialNo || 'G/L: ' + memo.memoNum }}</span>
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="memo.debitCredInd === 'H' ? 'badge-carbon' : 'badge-mahogany'">
+                                {{ memo.debitCredInd }}
+                            </span>
+                        </td>
+                        <td class="text-right font-weight-bold">{{ memo.amount | currency:memo.currency }}</td>
+                        <td class="text-right">{{ memo.quantity | number }} {{ memo.unit }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Mobile Cards: Memos -->
+        <div class="mobile-cards" *ngIf="activeTab === 'memos'">
+            <div class="finance-card" *ngFor="let memo of filteredMemos">
+                <div class="card-header">
+                    <div>
+                        <span class="card-label">Memo</span>
+                        <strong>#{{ memo.memoNum }}</strong>
+                    </div>
+                    <span class="badge" [ngClass]="memo.debitCredInd === 'H' ? 'badge-carbon' : 'badge-mahogany'">
+                        {{ memo.debitCredInd }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="card-row">
+                        <span>Type</span>
+                        <strong>{{ memo.docType }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Posting Date</span>
+                        <strong>{{ memo.postingDate | date:'mediumDate' }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Reference</span>
+                        <strong>{{ memo.materialNo || ('G/L: ' + memo.memoNum) }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Amount</span>
+                        <strong>{{ memo.amount | currency:memo.currency }}</strong>
+                    </div>
+                    <div class="card-row">
+                        <span>Quantity</span>
+                        <strong>{{ memo.quantity | number }} {{ memo.unit }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="(activeTab === 'invoices' && filteredInvoices.length === 0) || (activeTab === 'memos' && filteredMemos.length === 0)">
+            <p>No records found matching your search.</p>
+        </div>
+
+    </div>
+</div>

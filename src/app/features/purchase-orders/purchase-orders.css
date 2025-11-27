@@ -129,6 +129,9 @@
 }
 
 .data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     background-color: #fafafa;
     color: var(--text-muted);
     font-weight: 600;

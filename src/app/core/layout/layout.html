@@ -48,11 +48,40 @@
             </a>
         </nav>
 
-        <div class="user-info">
-            <small>Logged in as:</small>
-            <strong>{{ vendorId }}</strong>
-            <button (click)="logout()" class="btn-logout">Sign Out</button>
-        </div>
+        <ng-container *ngIf="profile; else profileFallback">
+            <div class="user-profile">
+                <div class="profile-main">
+                    <div class="avatar">{{ profileInitials }}</div>
+                    <div>
+                        <p class="user-name">{{ profile.name || 'Vendor Partner' }}</p>
+                        <p class="user-meta">{{ profile.city && profile.country ? (profile.city + ', ' + profile.country) : profileSubtitle }}</p>
+                    </div>
+                </div>
+                <div class="profile-meta">
+                    <span class="status-pill" [class.online]="(profile.status || '').toLowerCase() === 'active'">
+                        {{ profile.status || 'Connected' }}
+                    </span>
+                    <small>ID: {{ profile.vendorId }}</small>
+                </div>
+                <button (click)="logout()" class="btn-logout">Sign Out</button>
+            </div>
+        </ng-container>
+        <ng-template #profileFallback>
+            <div class="user-profile">
+                <div class="profile-main">
+                    <div class="avatar" [class.loading]="isProfileLoading">{{ profileInitials }}</div>
+                    <div>
+                        <p class="user-name">{{ profile?.name || 'Vendor Partner' }}</p>
+                        <p class="user-meta">{{ profileSubtitle }}</p>
+                    </div>
+                </div>
+                <div class="profile-meta">
+                    <span class="status-pill muted">{{ isProfileLoading ? 'Syncing' : 'Offline' }}</span>
+                    <small>ID: {{ vendorId || '—' }}</small>
+                </div>
+                <button (click)="logout()" class="btn-logout">Sign Out</button>
+            </div>
+        </ng-template>
     </aside>
 
     <main class="main-content">

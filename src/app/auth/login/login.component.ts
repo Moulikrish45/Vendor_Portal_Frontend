@@ -15,6 +15,7 @@ export class LoginComponent {
   loginForm: FormGroup;
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
 
   // Inject ApiService
   constructor(
@@ -23,9 +24,18 @@ export class LoginComponent {
     private apiService: ApiService 
   ) {
     this.loginForm = this.fb.group({
-      vendorId: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
+      vendorId: ['', [Validators.required, Validators.pattern('^[0-9]{6}$')]],
       password: ['', Validators.required]
     });
+  }
+
+  onVendorIdInput(event: any) {
+    const value = event.target.value.replace(/\D/g, '').slice(0, 6);
+    this.loginForm.patchValue({ vendorId: value }, { emitEvent: false });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit() {

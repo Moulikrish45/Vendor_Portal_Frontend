@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { VendorProfile } from '../models/profile.model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,234 @@ import { environment } from '../../../environments/environment';
 export class ApiService {
 
   constructor(private http: HttpClient) { }
+
+  getVendorProfile(vendorId: string): Observable<VendorProfile> {
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <urn:ZFM_PROFILE_863>
+            <IV_VENDOR_ID>${vendorId}</IV_VENDOR_ID>
+          </urn:ZFM_PROFILE_863>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+
+    const url = '/sap/bc/srt/scs/sap/ZRFC_PROFILE_VENDOR_863?sap-client=' + environment.sapClient;
+
+    return this.http.post(url, soapBody, {
+      headers: new HttpHeaders({ 'Content-Type': 'text/xml; charset=utf-8' }),
+      responseType: 'text'
+    }).pipe(map(xml => this.parseProfileXml(xml)));
+  }
+
+  private parseProfileXml(xml: string): VendorProfile {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'text/xml');
+    // The XML structure returns a list, but we just need the first item for the profile
+    const item = xmlDoc.getElementsByTagName('item')[0];
+
+    if (!item) {
+      throw new Error('Profile not found');
+    }
+
+    const getText = (tag: string) => item.getElementsByTagName(tag)[0]?.textContent || '';
+
+    return {
+      vendorId: getText('VENDOR_ID'),
+      name: getText('VENDOR_NAME'),
+      city: getText('CITY'),
+      country: getText('COUNTRY'),
+      status: getText('STATUS_MSG')
+    };
+  }
+
+  // 1. Fetch Finance (Invoices & Aging)
+  getFinanceData(vendorId: string): Observable<any[]> {
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <urn:ZFM_FINANCE_863>
+            <IV_VENDOR_ID>${vendorId}</IV_VENDOR_ID>
+          </urn:ZFM_FINANCE_863>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+    // Update URL
+    const url = '/sap/bc/srt/scs/sap/ZRFC_FINANCE_Vendor_863?sap-client=' + environment.sapClient;
+
+    return this.http.post(url, soapBody, {
+      headers: new HttpHeaders({ 'Content-Type': 'text/xml; charset=utf-8' }),
+      responseType: 'text'
+    }).pipe(map(xml => this.parseFinanceXml(xml)));
+  }
+
+  // 2. Fetch Memos
+  getMemoData(vendorId: string): Observable<any[]> {
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <urn:ZFM_MEMO_863>
+            <IV_VENDOR_ID>${vendorId}</IV_VENDOR_ID>
+          </urn:ZFM_MEMO_863>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+    // Update URL
+    const url = '/sap/bc/srt/scs/sap/ZRFC_Memo_Vendor_863?sap-client=' + environment.sapClient;
+
+    return this.http.post(url, soapBody, {
+      headers: new HttpHeaders({ 'Content-Type': 'text/xml; charset=utf-8' }),
+      responseType: 'text'
+    }).pipe(map(xml => this.parseMemoXml(xml)));
+  }
+
+  // --- PARSERS ---
+
+  private parseFinanceXml(xml: string): any[] {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
+    const list: any[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const node = items[i];
+      const getText = (tag: string) => node.getElementsByTagName(tag)[0]?.textContent || '';
+
+      list.push({
+        invoiceNum: getText('INVOICE_NUM'),
+        postingDate: getText('POSTING_DATE'),
+        docDate: getText('DOC_DATE'),
+        amount: parseFloat(getText('AMOUNT') || '0'),
+        currency: getText('CURRENCY'),
+        dueDate: getText('DUE_DATE'),
+        agingDays: parseInt(getText('AGING_DAYS') || '0', 10)
+      });
+    }
+    return list;
+  }
+
+  private parseMemoXml(xml: string): any[] {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
+    const list: any[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const node = items[i];
+      const getText = (tag: string) => node.getElementsByTagName(tag)[0]?.textContent || '';
+
+      list.push({
+        memoNum: getText('MEMO_NUM'),
+        docType: getText('DOC_TYPE'),
+        postingDate: getText('POSTING_DATE'),
+        amount: parseFloat(getText('AMOUNT') || '0'),
+        currency: getText('CURRENCY'),
+        debitCredInd: getText('DEBIT_CRED_IND'), // 'S' or 'H'
+        materialNo: getText('MATERIAL_NO'),
+        quantity: parseFloat(getText('QUANTITY') || '0'),
+        unit: getText('UNIT')
+      });
+    }
+    return list;
+  }
+
+  getGoodsReceipts(vendorId: string): Observable<any[]> {
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <urn:ZFM_GR_863>
+            <IV_VENDOR_ID>${vendorId}</IV_VENDOR_ID>
+          </urn:ZFM_GR_863>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+
+    const url = '/sap/bc/srt/scs/sap/ZRFC_GR_Vendor_863?sap-client=' + environment.sapClient;
+
+    return this.http.post(url, soapBody, {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/xml; charset=utf-8'
+      }),
+      responseType: 'text'
+    }).pipe(
+      map(responseXml => this.parseGrResponse(responseXml))
+    );
+  }
+
+  private parseGrResponse(xml: string): any[] {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
+    const grList: any[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const node = items[i];
+      const getText = (tag: string) => node.getElementsByTagName(tag)[0]?.textContent || '';
+
+      grList.push({
+        matDocNum: getText('MAT_DOC_NUM'),
+        fiscalYear: getText('FISCAL_YEAR'),
+        compCode: getText('COMP_CODE'),
+        vendorId: getText('VENDOR_ID'),
+        // Format Material: Remove leading zeros
+        materialNo: getText('MATERIAL_NO').replace(/^0+/, ''),
+        plant: getText('PLANT'),
+        postingDate: getText('POSTING_DATE')
+      });
+    }
+    return grList;
+  }
+
+  getRFQs(vendorId: string): Observable<any[]> {
+    const soapBody = `
+      <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+        <soapenv:Header/>
+        <soapenv:Body>
+          <urn:ZFM_RFQ_863>
+            <IV_VENDOR_ID>${vendorId}</IV_VENDOR_ID>
+          </urn:ZFM_RFQ_863>
+        </soapenv:Body>
+      </soapenv:Envelope>
+    `;
+
+    // Note: Update the URL to match the RFQ endpoint from your screenshot
+    const url = '/sap/bc/srt/scs/sap/ZRFC_RFQ_Vendor_863?sap-client=' + environment.sapClient;
+
+    return this.http.post(url, soapBody, {
+      headers: new HttpHeaders({
+        'Content-Type': 'text/xml; charset=utf-8'
+      }),
+      responseType: 'text'
+    }).pipe(
+      map(responseXml => this.parseRfqResponse(responseXml))
+    );
+  }
+
+  private parseRfqResponse(xml: string): any[] {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, 'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
+    const rfqList: any[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const node = items[i];
+      const getText = (tag: string) => node.getElementsByTagName(tag)[0]?.textContent || '';
+
+      rfqList.push({
+        vendorId: getText('VENDOR_ID'),
+        rfqNumber: getText('RFQ_NUMBER'),
+        rfqDate: getText('RFQ_DATE'),
+        materialText: getText('MATERIAL_TEXT'),
+        quantity: parseFloat(getText('QUANTITY') || '0'),
+        unit: getText('UNIT')
+      });
+    }
+    return rfqList;
+  }
 
   getPurchaseOrders(vendorId: string): Observable<any[]> {
     const soapBody = `

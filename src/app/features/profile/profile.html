@@ -1,1 +1,103 @@
-<p>profile works!</p>
+<div class="page-container">
+    
+    <div class="page-header">
+        <div class="title-group">
+            <h2>Company Profile</h2>
+            <p class="subtitle">Manage your account and business details</p>
+        </div>
+        <button class="btn-refresh" (click)="loadData()" [disabled]="isLoading">
+            <span class="icon-spin" [innerHTML]="refreshIcon"></span>
+            Refresh
+        </button>
+    </div>
+
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div><p>Retrieving vendor identity...</p>
+    </div>
+
+    <div class="error-banner" *ngIf="error">{{ error }}</div>
+
+    <div class="profile-grid" *ngIf="profile && !isLoading">
+        
+        <!-- LEFT: IDENTITY CARD -->
+        <div class="identity-card">
+            <div class="card-banner"></div>
+            <div class="card-content">
+                <div class="avatar">
+                    {{ initials }}
+                </div>
+                <h2 class="vendor-name">{{ profile.name }}</h2>
+                <div class="vendor-id">ID: {{ profile.vendorId }}</div>
+                
+                <div class="status-badge" [class.active]="profile.status === 'ACTIVE'">
+                    <span class="dot"></span>
+                    {{ profile.status }}
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="quick-actions">
+                    <button class="action-btn primary">Edit Details</button>
+                    <button class="action-btn outline">Change Password</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: DETAILS CARD -->
+        <div class="details-card">
+            <div class="section-header">
+                <h3>General Information</h3>
+                <button class="edit-link">Request Change</button>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Company Name</label>
+                    <div class="value">{{ profile.name }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Country Region</label>
+                    <div class="value">
+                        <span class="flag-icon">🌍</span> {{ profile.country }}
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label>City</label>
+                    <div class="value">{{ profile.city }}</div>
+                </div>
+                <div class="info-item">
+                    <label>Address</label>
+                    <!-- Placeholder address since backend only gave City -->
+                    <div class="value">{{ profile.city }}, {{ profile.country }} (Registered Office)</div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-header">
+                <h3>System Settings</h3>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Account Type</label>
+                    <div class="value">External Vendor</div>
+                </div>
+                <div class="info-item">
+                    <label>Currency</label>
+                    <div class="value">INR / EUR</div>
+                </div>
+                <div class="info-item">
+                    <label>Language</label>
+                    <div class="value">English (EN)</div>
+                </div>
+                <div class="info-item">
+                    <label>Payment Terms</label>
+                    <div class="value">Standard (Net 30)</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

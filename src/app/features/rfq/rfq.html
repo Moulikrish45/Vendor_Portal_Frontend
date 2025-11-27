@@ -1,1 +1,146 @@
-<p>rfq works!</p>
+<div class="page-container">
+    
+    <div class="page-header">
+        <div class="title-group">
+            <h2>Requests for Quotation</h2>
+            <p class="subtitle">Open opportunities for bidding</p>
+        </div>
+        <button class="btn-refresh" (click)="loadData()" [disabled]="isLoading">
+            <span class="icon-spin" [innerHTML]="refreshIcon"></span>
+            Refresh
+        </button>
+    </div>
+
+    <!-- Stats Summary + Search -->
+    <div class="stats-row">
+        <div class="stats-metrics">
+            <div class="stat-item">
+                <span class="label">Open Opportunities</span>
+                <span class="value">{{ filteredRfqs.length }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">Latest RFQ Date</span>
+                <span class="value">
+                    {{ filteredRfqs.length > 0 ? (filteredRfqs[0].rfqDate | date:'mediumDate') : '-' }}
+                </span>
+            </div>
+        </div>
+        <div class="stats-search">
+            <div class="search-wrapper">
+                <span class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </span>
+                <input 
+                    type="text" 
+                    [(ngModel)]="searchTerm" 
+                    (input)="onSearch()" 
+                    placeholder="Search RFQ or Material..."
+                    class="search-input stat-search-input"
+                >
+            </div>
+        </div>
+    </div>
+
+    <div class="error-banner" *ngIf="error">{{ error }}</div>
+    
+    <div class="loading-container" *ngIf="isLoading">
+        <div class="spinner"></div><p>Checking for new opportunities...</p>
+    </div>
+
+    <div class="table-card" *ngIf="!isLoading && !error">
+        <div class="table-scroll">
+            <!-- DESKTOP TABLE -->
+            <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%">RFQ Number</th>
+                    <th style="width: 25%">Material Description</th>
+                    <th style="width: 15%">Created Date</th>
+                    <th style="width: 15%" class="text-right">Quantity</th>
+                    <th style="width: 15%">Age</th>
+                    <th style="width: 15%" class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of filteredRfqs">
+                    <td class="primary-text"><strong>{{ item.rfqNumber }}</strong></td>
+                    <td>
+                        <div class="material-desc">
+                            {{ item.materialText }}
+                        </div>
+                    </td>
+                    <td>{{ item.rfqDate | date:'mediumDate' }}</td>
+                    
+                    <td class="text-right">
+                        <span class="qty-badge">
+                            {{ item.quantity | number }} {{ item.unit }}
+                        </span>
+                    </td>
+                    
+                    <td>
+                        <span class="age-text">{{ item.daysOpen }} days ago</span>
+                    </td>
+                    
+                    <td class="text-center">
+                        <button class="btn-bid" (click)="submitBid(item)">
+                            <span [innerHTML]="bidIcon"></span> Bid Now
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- MOBILE CARDS -->
+        <div class="mobile-cards">
+            <div class="rfq-card" *ngFor="let item of filteredRfqs">
+                <div class="card-header">
+                    <span class="rfq-id">#{{ item.rfqNumber }}</span>
+                    <span class="age-text">{{ item.daysOpen }} days ago</span>
+                </div>
+                <div class="card-body">
+                    <h3>{{ item.materialText }}</h3>
+                    <div class="detail-row">
+                        <span>Required:</span>
+                        <strong>{{ item.quantity | number }} {{ item.unit }}</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Date:</span>
+                        <span>{{ item.rfqDate | date:'mediumDate' }}</span>
+                    </div>
+                    <button class="btn-bid mobile-btn" (click)="submitBid(item)">
+                        Submit Quotation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredRfqs.length === 0">
+            <p>No open requests found at this time.</p>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" *ngIf="showToast">
+        <div class="toast">
+            <div class="toast-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <div class="toast-message">
+                <strong>Bid Not Available</strong>
+                <p>This material is not accepting bids right now.</p>
+            </div>
+            <button class="toast-close" (click)="showToast = false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
