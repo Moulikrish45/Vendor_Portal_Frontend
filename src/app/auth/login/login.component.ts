@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ApiService } from '../../shared/services/api.service'; // Import API Service
+import { ApiService } from '../../shared/services/api.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -17,11 +18,11 @@ export class LoginComponent {
   errorMessage = '';
   showPassword = false;
 
-  // Inject ApiService
   constructor(
     private fb: FormBuilder, 
     private router: Router,
-    private apiService: ApiService 
+    private apiService: ApiService,
+    private toast: ToastService
   ) {
     this.loginForm = this.fb.group({
       vendorId: ['', [Validators.required, Validators.pattern('^[0-9]{6}$')]],
@@ -54,8 +55,10 @@ export class LoginComponent {
             console.log('Login Successful:', response.message);
             // Save Vendor ID to session for other pages to use
             sessionStorage.setItem('currentVendor', vendorId);
+            // Show success toast
+            this.toast.success('Welcome!', `Login successful.`);
             // Navigate to Dashboard
-            this.router.navigate(['/dashboard']);
+            setTimeout(() => this.router.navigate(['/dashboard']), 500);
           } else {
             this.errorMessage = response.message || 'Invalid Credentials';
           }
